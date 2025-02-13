@@ -1,0 +1,396 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model ProductCategory {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  icon        String?   // 分类图标
+  image       String?   // 分类图片
+  status      String    @default("Active")
+  order       Int       @default(0)  // 用于排序
+  level       Int       @default(1)  // 层级，1为顶级分类
+  parentId    String?   // 父分类ID
+  parent      ProductCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    ProductCategory[] @relation("CategoryHierarchy")
+  products    Product[]  // 关联的产品
+  metaTitle   String?   // SEO相关
+  metaDescription String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([parentId])
+  @@index([status])
+  @@index([order])
+}
+
+model Product {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  categoryId  String    // 修改为外键关联
+  category    ProductCategory @relation(fields: [categoryId], references: [id])
+  status      String    @default("Active")
+  description String
+  features    String    @default("")
+  specifications String @default("")
+  models      String    @default("")
+  images      String?   // JSON string array
+  files       String?   // JSON string array
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([categoryId])
+  @@index([status])
+}
+
+model News {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  content     String
+  category    String
+  status      String   @default("Draft")
+  publishDate DateTime @default(now())
+  coverImage  String?
+  attachments String?
+  tags        String?
+  excerpt     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+  @@index([category])
+  @@index([tags])
+  @@index([publishDate])
+}
+
+model Solution {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  category    String
+  status      String    @default("Active")
+  description String
+  content     String
+  coverImage  String?   // JSON string
+  gallery     String?   // JSON string array
+  features    String?   // JSON string array
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Service {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  category    String
+  status      String    @default("Active")
+  description String
+  content     String
+  icon        String?   // JSON string
+  features    String?   // JSON string array
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Page {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  status      String    @default("Draft")
+  content     String
+  seo         String?   // JSON object for SEO metadata
+  hero        String?   // JSON object for hero section
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model NavigationItem {
+  id          String    @id @default(cuid())
+  label       String
+  url         String
+  type        String    @default("header") // header or footer
+  active      Boolean   @default(true)
+  order       Int       @default(0)
+  parentId    String?
+  parent      NavigationItem?  @relation("ParentChild", fields: [parentId], references: [id], onDelete: Cascade)
+  children    NavigationItem[] @relation("ParentChild")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([parentId])
+  @@index([type])
+}
+
+model Support {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  category    String
+  status      String    @default("Active")
+  content     String
+  attachments String?   // JSON string array
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Legal {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String
+  type        String    // privacy, terms, etc.
+  status      String    @default("Active")
+  content     String
+  version     String
+  effectiveDate DateTime
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([type, slug])
+}
+
+model FAQ {
+  id          String    @id @default(cuid())
+  question    String
+  answer      String
+  category    String?   // 可选的分类字段
+  order       Int       @default(0)  // 用于控制显示顺序
+  status      String    @default("Active")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model SectionContent {
+  id          String   @id @default(cuid())
+  name        String
+  title       String
+  description String
+  badge       String?
+  actions     String?
+  image       String?
+  media       String?
+  thumbnail   String?
+  features    String?
+  mapPoints   String?
+  featureTitle String?
+  featureSubtitle String?
+  mapTitle    String?
+  mapSubtitle String?
+  status      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Download {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  category    String    // e.g., 'Software', 'Documentation', 'Tools'
+  version     String?
+  fileUrl     String
+  fileSize    String?
+  fileType    String?   // e.g., 'pdf', 'zip', 'exe'
+  thumbnail   String?   // Optional thumbnail image
+  featured    Boolean   @default(false)
+  downloads   Int       @default(0)
+  status      String    @default("Active")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model ContactForm {
+  id          String    @id @default(cuid())
+  firstName   String
+  lastName    String
+  email       String
+  phone       String    // 添加电话字段
+  company     String
+  subject     String
+  message     String
+  status      String    @default("pending") // pending, in_progress, completed
+  attachments String?   // JSON string array for file attachments
+  notes       String?   // Internal notes
+  responses   ContactResponse[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model ContactResponse {
+  id          String    @id @default(cuid())
+  contactForm ContactForm @relation(fields: [formId], references: [id])
+  formId      String
+  message     String
+  respondedBy String    // Email or name of staff member
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model ContactSettings {
+  id            String    @id @default(cuid())
+  type          String    @unique // headquarters, contact, businessHours
+  data          String    // JSON string for flexible data storage
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model GlobalOffice {
+  id          String    @id @default(cuid())
+  name        String
+  location    String
+  address     String
+  status      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model NotificationConfig {
+  id          String    @id @default(cuid())
+  name        String
+  type        String    // new_contact, status_change, etc.
+  description String
+  emails      String    // JSON string array of email addresses
+  enabled     Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Settings {
+  id          String    @id @default(cuid())
+  type        String    @unique  // smtp, website, etc.
+  data        String    // JSON string for flexible data storage
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("settings")
+}
+
+model SocialMedia {
+  id           Int      @id @default(autoincrement())
+  platform     String
+  url          String
+  icon         String
+  displayOrder Int      @default(0)
+  isActive     Boolean  @default(true)
+  qrCode       String?
+  hasQrCode    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([platform, url], name: "platform_url")
+  @@map("social_media")
+}
+
+model MediaAsset {
+  id          String    @id @default(cuid())
+  name        String
+  description String
+  type        String    // file type (document, image, video, etc.)
+  category    String    // main category
+  subCategory String?   // optional sub-category
+  tags        String?   // JSON array of tags
+  status      String    @default("Active")
+  path        String    // storage path
+  size        Int
+  mimeType    String
+  metadata    String?   // JSON object for additional metadata
+  downloads   Int       @default(0)
+  versions    MediaVersion[]
+  usages      MediaUsage[]
+  properties  MediaProperty[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model MediaVersion {
+  id          String    @id @default(cuid())
+  asset       MediaAsset @relation(fields: [assetId], references: [id])
+  assetId     String
+  version     String
+  path        String
+  size        Int
+  changelog   String?
+  createdAt   DateTime  @default(now())
+}
+
+model MediaUsage {
+  id          String    @id @default(cuid())
+  asset       MediaAsset @relation(fields: [assetId], references: [id])
+  assetId     String
+  entityType  String    // Product, Download, etc.
+  entityId    String
+  createdAt   DateTime  @default(now())
+
+  @@unique([assetId, entityType, entityId])
+}
+
+model MediaProperty {
+  id          String    @id @default(cuid())
+  asset       MediaAsset @relation(fields: [assetId], references: [id])
+  assetId     String
+  key         String
+  value       String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([assetId, key])
+}
+
+model MediaCategory {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  parentId    String?   // for hierarchical categories
+  status      String    @default("Active")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model GlobalSEO {
+  id                String    @id @default(cuid())
+  description       String
+  keywords          String?
+  ogImage           String?   // Open Graph image URL
+  robotsTxt         String?   // Robots.txt content
+  googleVerification String?  // Google Search Console verification code
+  bingVerification   String?  // Bing Webmaster verification code
+  customMetaTags    String?   // JSON string for custom meta tags
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  name      String
+  password  String
+  role      String    @default("user")
+  status    String    @default("active")
+  sessions  Session[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([email])
+  @@index([role])
+  @@index([status])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([token])
+} 
