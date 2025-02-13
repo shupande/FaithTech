@@ -378,228 +378,69 @@ function generateStructuredData(
   website: any,
   homeContent: HomeContent | null
 ): StructuredData[] {
-  const baseUrl = website?.url || process.env.NEXT_PUBLIC_BASE_URL || ''
-  const schemas: StructuredData[] = []
-  
-  // 组织信息
-  const organizationSchema: StructuredData = {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    '@id': `${baseUrl}/#organization`,
-    name: website?.name || 'FaithTech',
-    url: baseUrl,
-    logo: {
-      '@type': 'ImageObject',
-      url: website?.logo || '',
-      width: 1200,
-      height: 630,
-      caption: website?.name
-    },
-    sameAs: [
-      website?.social?.facebook,
-      website?.social?.twitter,
-      website?.social?.linkedin,
-      website?.social?.youtube,
-      website?.social?.instagram,
-      website?.social?.github,
-    ].filter(Boolean),
-    contactPoint: [
-      {
-        '@type': 'ContactPoint',
-        telephone: website?.phone,
-        email: website?.email,
-        contactType: 'customer service',
-        areaServed: website?.serviceArea || 'Worldwide',
-        availableLanguage: website?.languages || ['en'],
-      },
-      {
-        '@type': 'ContactPoint',
-        telephone: website?.supportPhone,
-        email: website?.supportEmail,
-        contactType: 'technical support',
-        areaServed: website?.serviceArea || 'Worldwide',
-        availableLanguage: website?.languages || ['en'],
-      }
-    ],
-    address: website?.address ? {
-      '@type': 'PostalAddress',
-      ...website.address
-    } : undefined,
-    foundingDate: website?.foundingDate,
-    founders: website?.founders?.map((founder: any) => ({
-      '@type': 'Person',
-      name: founder.name,
-      jobTitle: founder.title,
-    })),
-    numberOfEmployees: website?.employeeCount,
-    slogan: website?.slogan,
-    description: website?.description,
-  }
-  schemas.push(organizationSchema)
+  if (!homeContent) return []
 
-  // 网站信息
   const websiteSchema: StructuredData = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    '@id': `${baseUrl}/#website`,
-    url: baseUrl,
-    name: website?.name || 'FaithTech',
-    description: website?.description,
-    publisher: {
-      '@id': `${baseUrl}/#organization`,
-    },
-    potentialAction: [
-      {
-        '@type': 'SearchAction',
-        target: `${baseUrl}/search?q={search_term_string}`,
-        'query-input': 'required name=search_term_string',
-      },
-      {
-        '@type': 'ReadAction',
-        target: [
-          `${baseUrl}/about`,
-          `${baseUrl}/contact`,
-          `${baseUrl}/products`,
-        ],
-      }
-    ],
-    inLanguage: website?.languages || ['en'],
-    copyrightYear: new Date().getFullYear(),
-    creditText: website?.copyright,
-    keywords: website?.keywords,
-  }
-  schemas.push(websiteSchema)
-
-  // 网页信息
-  if (homeContent) {
-    const webpageSchema: StructuredData = {
-      '@context': 'https://schema.org',
-      '@type': 'WebPage',
-      '@id': `${baseUrl}/#webpage`,
-      url: baseUrl,
-      name: homeContent.title,
-      description: homeContent.description,
-      isPartOf: {
-        '@id': `${baseUrl}/#website`,
-      },
-      about: {
-        '@id': `${baseUrl}/#organization`,
-      },
-      primaryImageOfPage: homeContent.media?.url ? {
-        '@type': 'ImageObject',
-        url: homeContent.media.url,
-        width: homeContent.media.width || 1200,
-        height: homeContent.media.height || 630,
-        caption: homeContent.media.caption,
-      } : undefined,
-      datePublished: new Date().toISOString(),
-      dateModified: new Date().toISOString(),
-      breadcrumb: {
-        '@id': `${baseUrl}/#breadcrumb`,
-      },
-      speakable: {
-        '@type': 'SpeakableSpecification',
-        cssSelector: ['h1', 'h2', '.description'],
-      },
+    name: website?.name || 'BatteryEmulator',
+    description: website?.description || '',
+    url: website?.url || '',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${website?.url || ''}/search?q={search_term_string}`,
+      'query-input': 'required name=search_term_string'
     }
-    schemas.push(webpageSchema)
   }
 
-  // 特性列表
-  if (homeContent?.features.length) {
-    const itemListSchema: StructuredData = {
-      '@context': 'https://schema.org',
-      '@type': 'ItemList',
-      '@id': `${baseUrl}/#features`,
-      name: homeContent.featureTitle || 'Key Features',
-      description: homeContent.featureSubtitle,
-      itemListElement: homeContent.features.map((feature, index) => ({
-        '@type': 'ListItem',
-        position: index + 1,
-        item: {
-          '@type': 'Thing',
-          name: feature.title,
-          description: feature.seoDescription || feature.description,
-          url: feature.link?.href ? `${baseUrl}${feature.link.href}` : undefined,
-          image: feature.media?.url ? {
-            '@type': 'ImageObject',
-            url: feature.media.url,
-            caption: feature.media.caption || feature.title,
-          } : undefined,
-        },
-      })),
-      numberOfItems: homeContent.features.length,
-      itemListOrder: 'https://schema.org/ItemListOrderAscending',
-    }
-    schemas.push(itemListSchema)
-  }
-
-  // FAQ页面
-  if (website?.faq?.length) {
-    const faqSchema: StructuredData = {
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      '@id': `${baseUrl}/#faq`,
-      name: 'Frequently Asked Questions',
-      description: 'Common questions about our products and services',
-      mainEntity: website.faq.map((item: any) => ({
-        '@type': 'Question',
-        name: item.question,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: item.answer,
-          author: {
-            '@type': 'Organization',
-            name: website?.name,
-          },
-          dateCreated: item.createdAt || new Date().toISOString(),
-          upvoteCount: item.upvotes || 0,
-        },
-      })),
-    }
-    schemas.push(faqSchema)
-  }
-
-  // 面包屑导航
-  const breadcrumbSchema: StructuredData = {
+  const organizationSchema: StructuredData = {
     '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    '@id': `${baseUrl}/#breadcrumb`,
-    name: 'Breadcrumb',
-    itemListElement: [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        name: 'Home',
-        item: baseUrl,
-      },
-    ],
+    '@type': 'Organization',
+    name: website?.name || 'BatteryEmulator',
+    description: website?.description || '',
+    url: website?.url || '',
+    logo: website?.logo || '',
+    sameAs: [
+      website?.socialMedia?.twitter || '',
+      website?.socialMedia?.facebook || '',
+      website?.socialMedia?.linkedin || '',
+      website?.socialMedia?.youtube || '',
+    ].filter(Boolean)
   }
-  schemas.push(breadcrumbSchema)
 
-  // 如果有视频内容
-  if (homeContent?.media?.type === 'video') {
-    const videoSchema: StructuredData = {
-      '@context': 'https://schema.org',
-      '@type': 'VideoObject',
-      '@id': `${baseUrl}/#video`,
-      name: homeContent.title,
-      description: homeContent.description,
-      thumbnailUrl: homeContent.media.thumbnail,
-      uploadDate: new Date().toISOString(),
-      contentUrl: homeContent.media.url,
-      embedUrl: homeContent.media.url,
-      duration: homeContent.media.duration,
-      width: homeContent.media.width,
-      height: homeContent.media.height,
-      publisher: {
-        '@id': `${baseUrl}/#organization`,
-      },
+  const productSchema: StructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: homeContent.title,
+    description: homeContent.description,
+    brand: {
+      '@type': 'Brand',
+      name: website?.name || 'BatteryEmulator'
+    },
+    offers: {
+      '@type': 'Offer',
+      url: website?.url || '',
+      priceCurrency: website?.currency || 'USD',
+      availability: 'https://schema.org/InStock'
     }
-    schemas.push(videoSchema)
   }
 
-  return schemas
+  const softwareSchema: StructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: homeContent.title,
+    description: homeContent.description,
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Windows',
+    offers: {
+      '@type': 'Offer',
+      url: website?.url || '',
+      priceCurrency: website?.currency || 'USD',
+      availability: 'https://schema.org/InStock'
+    }
+  }
+
+  return [websiteSchema, organizationSchema, productSchema, softwareSchema]
 }
 
 async function generateMetadata(): Promise<Metadata> {

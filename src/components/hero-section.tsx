@@ -8,7 +8,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Play, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useEffect } from 'react'
 import Hls from 'hls.js'
-import { cn } from '@/lib/utils'
+import { cn, getImageUrl } from '@/lib/utils'
 
 interface Action {
   text: string
@@ -21,6 +21,10 @@ interface Media {
   type: 'image' | 'video'
   thumbnail?: string
   duration?: number // 视频时长（秒）
+  alt?: string
+  width?: number
+  height?: number
+  caption?: string
 }
 
 interface HeroSectionProps {
@@ -338,13 +342,13 @@ export function HeroSection({
                   </>
                 ) : (
                   <Image
-                    src={mediaArray[currentMediaIndex].url}
-                    alt={title}
-                    fill
-                    priority
+                    src={getImageUrl(mediaArray[currentMediaIndex].url)}
+                    alt={mediaArray[currentMediaIndex].alt || title}
+                    width={mediaArray[currentMediaIndex].width || 1280}
+                    height={mediaArray[currentMediaIndex].height || 720}
                     className="object-cover"
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 60vw"
-                    quality={90}
+                    priority
                   />
                 )}
 

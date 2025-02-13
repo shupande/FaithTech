@@ -158,20 +158,21 @@ export default function NewsEditPage({ params }: { params: { id: string } }) {
       const formData = new FormData()
       formData.append('file', file)
 
-      const response = await fetch('/api/uploads', {
+      const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       })
 
       if (!response.ok) {
-        throw new Error('Failed to upload image')
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || 'Failed to upload image')
       }
 
       const data = await response.json()
       console.log('Upload image response:', data)
 
       form.setValue('coverImage', {
-        url: data.url || data.data?.url,
+        url: data.url,
         alt: file.name
       })
       event.target.value = ''
@@ -194,13 +195,14 @@ export default function NewsEditPage({ params }: { params: { id: string } }) {
       const formData = new FormData()
       formData.append('file', file)
 
-      const response = await fetch('/api/uploads', {
+      const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       })
 
       if (!response.ok) {
-        throw new Error('Failed to upload file')
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || 'Failed to upload file')
       }
 
       const data = await response.json()
@@ -209,7 +211,7 @@ export default function NewsEditPage({ params }: { params: { id: string } }) {
       const attachments = form.getValues('attachments') || []
       form.setValue('attachments', [...attachments, {
         name: file.name,
-        url: data.url || data.data?.url,
+        url: data.url,
         size: file.size
       }])
       event.target.value = ''

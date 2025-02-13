@@ -11,6 +11,7 @@ import { Check, ChevronLeft, ChevronRight, Download, Battery, Zap, Shield, BarCh
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { ProductImages } from "@/components/product-images"
 import { Input } from "@/components/ui/input"
+import { getImageUrl } from "@/lib/utils"
 import type { LucideIcon } from 'lucide-react'
 
 // 图标映射
@@ -221,7 +222,7 @@ export function ProductContent({ product, relatedProducts, productId }: ProductC
                 <Card className="h-full hover:shadow-lg transition-shadow">
                   <div className="relative aspect-video">
                       <Image
-                      src={relatedProduct.images[0]?.url || '/images/product-placeholder.jpg'}
+                      src={getImageUrl(relatedProduct.images[0]?.url || '/images/product-placeholder.jpg')}
                       alt={relatedProduct.images[0]?.alt || relatedProduct.name}
                         fill
                         className="object-cover rounded-t-lg"

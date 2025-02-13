@@ -4,6 +4,7 @@ import * as React from 'react'
 import Image from 'next/image'
 import { Card } from "@/components/ui/card"
 import { ImagePreview } from "@/components/ui/image-preview"
+import { getImageUrl } from "@/lib/utils"
 
 interface ProductImage {
   url: string
@@ -20,12 +21,12 @@ export function ProductImages({ images }: ProductImagesProps) {
   return (
     <div className="space-y-4">
       <ImagePreview
-        src={images[selectedImage].url}
+        src={getImageUrl(images[selectedImage].url)}
         alt={images[selectedImage].alt}
       >
         <Card className="relative aspect-[4/3] overflow-hidden cursor-zoom-in">
           <Image
-            src={images[selectedImage].url}
+            src={getImageUrl(images[selectedImage].url)}
             alt={images[selectedImage].alt}
             fill
             className="object-cover"
@@ -42,7 +43,7 @@ export function ProductImages({ images }: ProductImagesProps) {
             }`}
           >
             <Image
-              src={image.url}
+              src={getImageUrl(image.url)}
               alt={image.alt}
               fill
               className="object-cover"

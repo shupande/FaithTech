@@ -28,7 +28,7 @@ async function getSettings() {
 
 export async function generateMetadata(): Promise<Metadata> {
   const { website, seo } = await getSettings()
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL || 'http://localhost:3001'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL || 'http://localhost:3000'
 
   return {
     metadataBase: new URL(baseUrl),

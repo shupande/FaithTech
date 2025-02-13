@@ -1,1 +1,8 @@
-{}
+{
+  "/api/navigation/route": "app/api/navigation/route.js",
+  "/api/faq/route": "app/api/faq/route.js",
+  "/api/settings/website/route": "app/api/settings/website/route.js",
+  "/api/social-media/route": "app/api/social-media/route.js",
+  "/(main)/page": "app/(main)/page.js",
+  "/(main)/products/[id]/page": "app/(main)/products/[id]/page.js"
+}
