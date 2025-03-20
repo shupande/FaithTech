@@ -1,0 +1,88 @@
+version: "1.0"
+
+app:
+  name: battery-emulator
+  type: nodejs
+  platform: next
+
+build:
+  nodejs_version: 18
+  commands:
+    - npm ci
+    - npx prisma generate
+    - npm run build
+
+run:
+  command: npm start
+  port: 3000
+  healthcheck:
+    path: /api/health
+    interval: 30s
+    timeout: 10s
+    retries: 3
+
+env:
+  - name: NODE_ENV
+    value: production
+  - name: PORT
+    value: 3000
+  - name: NEXT_PUBLIC_APP_URL
+    fromSecret: app_url
+  - name: DATABASE_URL
+    fromSecret: database_url
+  - name: JWT_SECRET
+    fromSecret: jwt_secret
+  - name: SMTP_HOST
+    fromSecret: smtp_host
+  - name: SMTP_PORT
+    fromSecret: smtp_port
+  - name: SMTP_USER
+    fromSecret: smtp_user
+  - name: SMTP_PASS
+    fromSecret: smtp_pass
+  - name: SMTP_FROM
+    fromSecret: smtp_from
+  - name: REDIS_URL
+    fromSecret: redis_url
+
+volumes:
+  - name: uploads
+    mountPath: /app/uploads
+    size: 10Gi
+  - name: next-cache
+    mountPath: /app/.next/cache
+    size: 5Gi
+
+services:
+  - name: postgres
+    type: postgres
+    version: "15"
+    env:
+      - name: POSTGRES_DB
+        value: battery_emulator
+      - name: POSTGRES_USER
+        fromSecret: db_user
+      - name: POSTGRES_PASSWORD
+        fromSecret: db_password
+    volume:
+      size: 20Gi
+
+  - name: redis
+    type: redis
+    version: "7"
+    volume:
+      size: 5Gi
+
+scaling:
+  min: 1
+  max: 3
+  cpu: 1
+  memory: 2Gi
+
+resources:
+  limits:
+    cpu: 1
+    memory: 2Gi
+  requests:
+    cpu: 0.5
+    memory: 1Gi 

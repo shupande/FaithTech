@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   images: {
     domains: ['localhost'],
     remotePatterns: [
@@ -46,10 +47,7 @@ const nextConfig = {
     return config
   },
   typescript: {
-    // !! WARN !!
-    // 在生产环境中不建议这样做
-    // 这里仅为了开发方便而临时忽略类型错误
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: process.env.NODE_ENV === 'development',
   },
 }
 
