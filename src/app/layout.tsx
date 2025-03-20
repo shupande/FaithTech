@@ -8,6 +8,18 @@ import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"] })
 
+// 防止 MetaMask 扩展重复定义 ethereum
+if (typeof window !== 'undefined') {
+  const ethereumDescriptor = Object.getOwnPropertyDescriptor(window, 'ethereum')
+  if (!ethereumDescriptor || ethereumDescriptor.configurable) {
+    Object.defineProperty(window, 'ethereum', {
+      value: window.ethereum,
+      configurable: false,
+      writable: true,
+    })
+  }
+}
+
 async function getSettings() {
   const [websiteSettings, seoSettings] = await Promise.all([
     prisma.settings.findUnique({
